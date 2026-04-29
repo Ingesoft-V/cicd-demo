@@ -1,4 +1,4 @@
-groovy
+
     pipeline {
         agent any
     stages {
@@ -40,4 +40,3 @@ groovy
             cleanWs() // Limpia el espacio de trabajo después de cada ejecución
         }
     }
-}
