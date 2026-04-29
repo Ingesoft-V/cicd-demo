@@ -14,7 +14,7 @@ pipeline {
         stage('Build') {
             steps {
                 // Comando de compilación (ejemplo para Maven)
-                sh 'mvn clean package -DskipTests'
+                sh './mvnw clean package -DskipTests'
                 
                 // Si fuera Node.js usarías: sh 'npm install'
             }
@@ -24,7 +24,7 @@ pipeline {
         stage('Test') {
             steps {
                 // Comando para ejecutar pruebas
-                sh 'mvn test'
+                sh './mvnw test'
                 
                 // Si fuera Node.js usarías: sh 'npm test'
             }
