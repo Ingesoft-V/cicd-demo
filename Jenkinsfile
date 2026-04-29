@@ -1,40 +1,43 @@
-pipeline {
-    agent any
-
+groovy
+    pipeline {
+        agent any
     stages {
-        // 1. Obtener el código fuente
         stage('Checkout') {
             steps {
-                // Reemplaza esta URL con la de tu propio repositorio si usas el tuyo
-                git 'https://github.com/Ingesoft-V/cicd-demo.git'
+                git 'https://github.com/helderklemp/cicd-demo.git'
             }
         }
-
-        // 2. Compilar la aplicación
-        stage('Build') {
+        stage('Build & Test') {
             steps {
-                // Comando de compilación (ejemplo para Maven)
-                sh './mvnw clean package -DskipTests'
-                
-                // Si fuera Node.js usarías: sh 'npm install'
+                sh 'mvn clean package' // Compila y ejecuta pruebas unitarias automáticamente
             }
         }
-
-        // 3. Ejecutar pruebas básicas
-        stage('Test') {
+        stage('Static Analysis (SonarQube)') {
             steps {
-                // Comando para ejecutar pruebas
-                sh './mvnw test'
-                
-                // Si fuera Node.js usarías: sh 'npm test'
+            // Requiere el plugin de SonarQube instalado en Jenkins
+                script {
+                    sh 'mvn sonar:sonar -Dsonar.projectKey=my-app -Dsonar.host.url=http://sonarqube:9000'
+                }
             }
         }
-
-        // 4. Construir la imagen Docker
-        stage('Docker Build') {
+        stage('Container Security Scan (Trivy)') {
             steps {
+                // Escanea la imagen Docker buscando vulnerabilidades conocidas
                 sh 'docker build -t mi-app:latest .'
+                sh 'trivy image mi-app:latest'
             }
+        }
+        stage('Deploy') {
+            when { branch 'main' }
+                steps {
+                    sh 'docker run -d -p 8080:8080 mi-app:latest'
+                }
+        }
+    }
+    post {
+        always {
+            echo 'Limpiando entorno...'
+            cleanWs() // Limpia el espacio de trabajo después de cada ejecución
         }
     }
 }
