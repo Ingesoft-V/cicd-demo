@@ -4,7 +4,7 @@ groovy
     stages {
         stage('Checkout') {
             steps {
-                git 'https://github.com/helderklemp/cicd-demo.git'
+                git 'https://github.com/Ingesoft-V/cicd-demo.git'
             }
         }
         stage('Build & Test') {
