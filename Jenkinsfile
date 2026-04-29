@@ -1,93 +1,40 @@
-#!/usr/bin/env groovy
-
 pipeline {
-    environment{
-       FEATURE_NAME = BRANCH_NAME.replaceAll('[\\(\\)_/]','-').toLowerCase()
-       REGISTRY_PASSWORD = credentials('REGISTRY_PASSWORD')
-       REGISTRY_USERNAME = credentials('REGISTRY_USERNAME')
-       POSTGRES_PASSWORD = credentials('POSTGRES_PASSWORD')
-       APP_NAME = "cicd-demo"
-    }
-    agent any 
+    agent any
+
     stages {
-        stage('Docker Build & Push') {
+        // 1. Obtener el código fuente
+        stage('Checkout') {
             steps {
-                sh "make dockerLogin build dockerBuild dockerPush"
-            }
-
-        }
-		// not in parallel due to race condition with .env
-        stage('Docker Scan') {
-            steps {
-                sh "make dockerScan"
-            }
-            post {
-                cleanup {
-                    sh "docker-compose down -v"
-                }
-            }
-        }
-        
-        stage('Parallel Tests') {
-            failFast true            
-            parallel {                  
-                stage('Static Code Analysis') {
-                    when {
-                        anyOf { branch 'master'; branch 'release'}
-                    }    
-                    steps {
-                        sh "make publishSonar"                        
-                    }
-                }
-                stage('Integration Tests') {
-                    steps {
-                        sh "make integrationTest"
-                    }
-                }
-            }
-        }
-        stage('Push Latest Tag') {
-            when { branch 'master' }
-            steps {
-                sh "make dockerPushLatest"
+                // Reemplaza esta URL con la de tu propio repositorio si usas el tuyo
+                git 'https://github.com/Ingesoft-V/cicd-demo.git'
             }
         }
 
-        stage('Deploy To dev') {
-            environment { 
-                ENV = "dev"
-                APP_DNS = util.selectAppUrl(ENV, FEATURE_NAME, APP_NAME)
-                KUBE_SERVER = credentials("KUBE_API_SERVER")
-                KUBE_TOKEN = credentials("KUBE_DEV_TOKEN")
-            }
+        // 2. Compilar la aplicación
+        stage('Build') {
             steps {
-                sh "make kubeLogin deploy"
+                // Comando de compilación (ejemplo para Maven)
+                sh 'mvn clean package -DskipTests'
+                
+                // Si fuera Node.js usarías: sh 'npm install'
             }
         }
-        
-        stage('Deploy To qa') {
-            when { expression { BRANCH_NAME ==~ /(master|release-[0-9]+$)/ }} // Only Master and Release branches 
-            environment { 
-                ENV = "qa"
-                APP_DNS = util.selectAppUrl(ENV, FEATURE_NAME, APP_NAME)
-                KUBE_SERVER = credentials("KUBE_API_SERVER")
-                KUBE_TOKEN = credentials("KUBE_QA_TOKEN")
-            }
+
+        // 3. Ejecutar pruebas básicas
+        stage('Test') {
             steps {
-                sh "make kubeLogin deploy"
+                // Comando para ejecutar pruebas
+                sh 'mvn test'
+                
+                // Si fuera Node.js usarías: sh 'npm test'
             }
         }
-        
-    }
-    post {
-        always {
-            script {
-                if(BRANCH_NAME ==~ /(master|release-[0-9]+$)/ ){
-                     util.notifySlack(currentBuild.result)
-                 }
+
+        // 4. Construir la imagen Docker
+        stage('Docker Build') {
+            steps {
+                sh 'docker build -t mi-app:latest .'
             }
-            archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
-            junit 'target/surefire-reports/*.xml'
         }
     }
 }
