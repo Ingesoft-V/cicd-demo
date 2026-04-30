@@ -97,18 +97,15 @@ pipeline {
         }
 
         // ── 6. ESCANEO DE SEGURIDAD (TRIVY) ───────────────────────────────────
+        // Trivy se ejecuta como binario local (instalado en el agente Jenkins).
         // Escanea la imagen buscando vulnerabilidades HIGH y CRITICAL.
-        // Usa volumen de cache para evitar re-descargar la DB en cada ejecución.
         stage('Container Security Scan (Trivy)') {
             steps {
                 script {
                     echo "Generando reporte de vulnerabilidades (HIGH y CRITICAL)..."
                     def trivyExitCode = sh(
                         script: """
-                            docker run --rm \
-                                -v /var/run/docker.sock:/var/run/docker.sock \
-                                -v trivy-cache:/root/.cache/trivy \
-                                aquasec/trivy image \
+                            trivy image \
                                 --severity HIGH,CRITICAL \
                                 --ignore-unfixed \
                                 --exit-code 0 \
