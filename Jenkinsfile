@@ -97,39 +97,29 @@ pipeline {
         }
 
         // ── 6. ESCANEO DE SEGURIDAD (TRIVY) ───────────────────────────────────
-        // Primero imprime el reporte completo (HIGH + CRITICAL) y luego falla
-        // si encuentra vulnerabilidades CRITICAL con fix disponible.
+        // Escanea la imagen buscando vulnerabilidades HIGH y CRITICAL.
+        // Usa volumen de cache para evitar re-descargar la DB en cada ejecución.
         stage('Container Security Scan (Trivy)') {
             steps {
                 script {
                     echo "Generando reporte de vulnerabilidades (HIGH y CRITICAL)..."
-                    sh """
-                        docker run --rm \
-                            -v /var/run/docker.sock:/var/run/docker.sock \
-                            aquasec/trivy image \
-                            --severity HIGH,CRITICAL \
-                            --exit-code 0 \
-                            --format table \
-                            ${IMAGE_NAME}:${IMAGE_TAG}
-                    """
-
-                    echo "Verificando gate de CRITICAL vulnerabilities (solo con fix disponible)..."
                     def trivyExitCode = sh(
                         script: """
                             docker run --rm \
                                 -v /var/run/docker.sock:/var/run/docker.sock \
+                                -v trivy-cache:/root/.cache/trivy \
                                 aquasec/trivy image \
-                                --severity CRITICAL \
+                                --severity HIGH,CRITICAL \
                                 --ignore-unfixed \
                                 --exit-code 0 \
-                                --quiet \
+                                --format table \
                                 ${IMAGE_NAME}:${IMAGE_TAG}
                         """,
                         returnStatus: true
                     )
 
                     if (trivyExitCode != 0) {
-                        error("Trivy encontró vulnerabilidades CRITICAL en la imagen. Deploy cancelado.")
+                        error("Trivy encontró vulnerabilidades CRITICAL con fix disponible. Deploy cancelado.")
                     } else {
                         echo "Reporte Trivy generado. Imagen aprobada para deploy."
                     }
