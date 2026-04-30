@@ -138,9 +138,9 @@ pipeline {
         }
 
         // ── 7. DEPLOY ──────────────────────────────────────────────────────────
-        // Solo despliega en la rama master. Para otras ramas solo se construye.
+        // Despliega cuando la rama es master (GIT_BRANCH funciona en Pipeline from SCM).
         stage('Deploy') {
-            when { branch 'master' }
+            when { expression { env.GIT_BRANCH ==~ /.*master.*/ } }
             steps {
                 script {
                     sh """
