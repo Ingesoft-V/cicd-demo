@@ -1,13 +1,45 @@
 version: '3.7'
-services:
-  kubectl:
-    image: cmdsolutions/cmdline_kube:13195
-    env_file: .env
-    volumes:
-      - .:/srv/app:Z
-      - ~/.kube:/root/.kube:Z
-    working_dir: /srv/app
 
+networks:
+  cicd-network:
+    driver: bridge
+
+services:
+
+  # ── JENKINS ──────────────────────────────────────────────────────────────────
+  jenkins:
+    image: jenkins/jenkins:lts
+    container_name: jenkins
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+      - "50000:50000"
+    volumes:
+      - jenkins_home:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - DOCKER_HOST=unix:///var/run/docker.sock
+      - JAVA_OPTS=-Dhudson.plugins.git.GitSCM.ALLOW_LOCAL_CHECKOUT=true
+    networks:
+      - cicd-network
+
+  # ── SONARQUBE ────────────────────────────────────────────────────────────────
+  sonarqube:
+    image: sonarqube:lts-community
+    container_name: sonarqube
+    restart: unless-stopped
+    ports:
+      - "9000:9000"
+    environment:
+      - SONAR_ES_BOOTSTRAP_CHECKS_DISABLE=true
+    volumes:
+      - sonarqube_data:/opt/sonarqube/data
+      - sonarqube_logs:/opt/sonarqube/logs
+      - sonarqube_extensions:/opt/sonarqube/extensions
+    networks:
+      - cicd-network
+
+  # ── BUILDER (Maven) ──────────────────────────────────────────────────────────
   builder:
     image: maven:3.6.0-jdk-10-slim
     env_file: .env
@@ -15,19 +47,28 @@ services:
       - .:/srv/app:Z
       - ~/.m2:/root/.m2:Z
     working_dir: /srv/app
+    networks:
+      - cicd-network
 
+  # ── SELENIUM ─────────────────────────────────────────────────────────────────
   selenium:
     image: selenium/standalone-chrome
+    networks:
+      - cicd-network
 
-  # postgres:
-  #   image:  helderklemp/arminc/clair-db:latest
-  #   env_file: .env
-      
-  # clair:
-  #   image: helderklemp/arminc/clair-local-scan:v2.0.6
-  #   entrypoint: ["/wait-for-it.sh", "postgres:5432", "--"]
-  #   command: ["/clair", "-config=/config/config.yaml"]
-  #   volumes:
-  #     - /var/run/docker.sock:/var/run/docker.sock:Z
-  #   depends_on:
-  #     - postgres  
+  # ── KUBECTL ──────────────────────────────────────────────────────────────────
+  kubectl:
+    image: cmdsolutions/cmdline_kube:13195
+    env_file: .env
+    volumes:
+      - .:/srv/app:Z
+      - ~/.kube:/root/.kube:Z
+    working_dir: /srv/app
+    networks:
+      - cicd-network
+
+volumes:
+  jenkins_home:
+  sonarqube_data:
+  sonarqube_logs:
+  sonarqube_extensions:
