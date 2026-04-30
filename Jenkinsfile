@@ -109,6 +109,7 @@ pipeline {
                                 --severity HIGH,CRITICAL \
                                 --ignore-unfixed \
                                 --exit-code 0 \
+                                --timeout 30m \
                                 --format table \
                                 ${IMAGE_NAME}:${IMAGE_TAG}
                         """,
