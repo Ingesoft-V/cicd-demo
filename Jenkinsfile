@@ -121,7 +121,7 @@ pipeline {
                                 aquasec/trivy image \
                                 --severity CRITICAL \
                                 --ignore-unfixed \
-                                --exit-code 0 \
+                                --exit-code 1 \
                                 --quiet \
                                 ${IMAGE_NAME}:${IMAGE_TAG}
                         """,
