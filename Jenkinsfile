@@ -151,10 +151,10 @@ pipeline {
                         echo "Iniciando nueva versión de la aplicación..."
                         docker run -d \
                             --name ${CONTAINER_NAME} \
-                            -p 80:8080 \
+                            -p 8081:8080 \
                             ${IMAGE_NAME}:${IMAGE_TAG}
 
-                        echo "Aplicación desplegada en http://localhost:80"
+                        echo "Aplicación desplegada en http://localhost:8081"
                     """
                 }
             }
