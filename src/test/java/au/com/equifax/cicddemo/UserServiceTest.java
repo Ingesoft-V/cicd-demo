@@ -1,20 +1,19 @@
 package au.com.equifax.cicddemo;
 
-import au.com.equifax.cicddemo.domain.UnitTest;
 import au.com.equifax.cicddemo.domain.User;
 import au.com.equifax.cicddemo.service.UserService;
 import au.com.equifax.cicddemo.service.UserServiceImpl;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.experimental.categories.Category;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-@Category(UnitTest.class)
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 public class UserServiceTest {
 
     private UserService service;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         service=new UserServiceImpl();
     }
@@ -26,37 +25,33 @@ public class UserServiceTest {
                 .withLogin("hklemp")
                 .withName("Helder Klemp").build();
         service.save(usr);
-        Assert.assertEquals(1,service.getUsersTotal());
+        Assertions.assertEquals(1,service.getUsersTotal());
     }
-    @Test(expected = IllegalArgumentException.class)
-    public void validateUserTest(){
 
+    @Test
+    public void validateUserTest(){
         //BAsic User
         User usr =User.UserBuilder.anUser()
                 .withEmail("helderklemp@gmail.com").build();
-        service.save(usr);
-
+        assertThrows(IllegalArgumentException.class, () -> {
+            service.save(usr);
+        });
     }
+
     @Test
     public void validateUserCollectionTest(){
-
-
         User usr =User.UserBuilder.anUser()
                 .withEmail("another@gmail.com")
                 .withLogin("another")
                 .withName("another").build();
         service.save(usr);
 
-
         service.getUsers().stream().forEach(user ->
-                Assert.assertEquals(user,usr));
-
+                Assertions.assertEquals(user,usr));
     }
 
     @Test
     public void validateFindByIdTest(){
-
-
         User usr =User.UserBuilder.anUser()
                 .withEmail("another@gmail.com")
                 .withLogin("another")
@@ -64,9 +59,6 @@ public class UserServiceTest {
                 .withName("another").build();
         service.save(usr);
 
-
-        Assert.assertEquals(usr,service.findById(10).get());
+        Assertions.assertEquals(usr,service.findById(10).get());
     }
-
-
 }

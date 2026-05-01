@@ -1,0 +1,9 @@
+/Users/vasamo/cicd-demo/src/main/java/au/com/equifax/cicddemo/CicdDemoApplication.java
+/Users/vasamo/cicd-demo/src/main/java/au/com/equifax/cicddemo/controller/ApiController.java
+/Users/vasamo/cicd-demo/src/main/java/au/com/equifax/cicddemo/controller/ConfigController.java
+/Users/vasamo/cicd-demo/src/main/java/au/com/equifax/cicddemo/controller/DemoController.java
+/Users/vasamo/cicd-demo/src/main/java/au/com/equifax/cicddemo/controller/UserController.java
+/Users/vasamo/cicd-demo/src/main/java/au/com/equifax/cicddemo/domain/EnvDetail.java
+/Users/vasamo/cicd-demo/src/main/java/au/com/equifax/cicddemo/domain/User.java
+/Users/vasamo/cicd-demo/src/main/java/au/com/equifax/cicddemo/service/UserService.java
+/Users/vasamo/cicd-demo/src/main/java/au/com/equifax/cicddemo/service/UserServiceImpl.java

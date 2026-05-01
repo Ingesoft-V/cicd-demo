@@ -1,35 +1,27 @@
 package au.com.equifax.cicddemo;
 
-import au.com.equifax.cicddemo.domain.IntegrationTest;
-import au.com.equifax.cicddemo.domain.UnitTest;
 import au.com.equifax.cicddemo.domain.User;
 import org.json.JSONException;
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.experimental.categories.Category;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.boot.web.server.LocalServerPort;
+import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
-import org.springframework.test.context.junit4.SpringRunner;
 
-@RunWith(SpringRunner.class)
-@Category(IntegrationTest.class)
 @SpringBootTest(classes = CicdDemoApplication.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class UserControllerIntTest {
 
     @LocalServerPort
     private int port;
 
-    TestRestTemplate restTemplate = new TestRestTemplate();
+    private TestRestTemplate restTemplate = new TestRestTemplate();
 
-    HttpHeaders headers = new HttpHeaders();
-
+    private HttpHeaders headers = new HttpHeaders();
 
     @Test
     public void testRetrieveStudentCourse() throws JSONException {
@@ -37,14 +29,11 @@ public class UserControllerIntTest {
         HttpEntity<String> entity = new HttpEntity<String>(null, headers);
 
         ResponseEntity<String> response = restTemplate.exchange(
-                createURLWithPort("/users/"),
+                createURLWithPort("/users"),
                 HttpMethod.GET, entity, String.class);
 
-        //String expected = "{id:Course1,name:Spring,description:10 Steps}";
         String expected = "[]";
-        // Empty
         JSONAssert.assertEquals(expected, response.getBody(), false);
-
 
         User usr =User.UserBuilder.anUser()
                 .withEmail("another@gmail.com")
@@ -55,7 +44,7 @@ public class UserControllerIntTest {
 
         //Post
         restTemplate.exchange(
-                createURLWithPort("/users/"),
+                createURLWithPort("/users"),
                 HttpMethod.POST, entityUsr, User.class);
 
         //Get By ID
@@ -63,8 +52,8 @@ public class UserControllerIntTest {
         ResponseEntity<User> responseUsr = restTemplate.exchange(
                 createURLWithPort("/users/"+usr.getId()),
                 HttpMethod.GET, entityUsr, User.class);
-        //responseUsr.getBody()
-        Assert.assertEquals(usr, responseUsr.getBody());
+        
+        Assertions.assertEquals(usr, responseUsr.getBody());
 
     }
 
