@@ -110,6 +110,7 @@ pipeline {
                             --severity HIGH,CRITICAL \
                             --exit-code 0 \
                             --format table \
+                            --timeout 15m \
                             ${IMAGE_NAME}:${IMAGE_TAG}
                     """
 
@@ -123,6 +124,7 @@ pipeline {
                                 --ignore-unfixed \
                                 --exit-code 1 \
                                 --quiet \
+                                --timeout 15m \
                                 ${IMAGE_NAME}:${IMAGE_TAG}
                         """,
                         returnStatus: true
