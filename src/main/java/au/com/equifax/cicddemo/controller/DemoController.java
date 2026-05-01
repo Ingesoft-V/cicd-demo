@@ -18,14 +18,14 @@ public class DemoController {
     private static final String DB_PASSWORD = "admin123";
     private static final String API_KEY = "secret-key-12345";
 
-    private static final String APP_MESSAGE = "Hola desde el pipeline de CI/CD - v2.0";
+    private static final String APP_MESSAGE = "Hola desde el pipeline de CI/CD - v3.0";
 
     @GetMapping("/demo")
     public Map<String, String> demo() {
         Map<String, String> response = new HashMap<>();
         response.put("message", APP_MESSAGE);
         response.put("status", "running");
-        response.put("version", "2.0");
+        response.put("version", "3.0");
         return response;
     }
 

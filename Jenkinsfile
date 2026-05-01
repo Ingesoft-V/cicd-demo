@@ -7,7 +7,7 @@ pipeline {
         CONTAINER_NAME    = 'mi-app-container'
         SONAR_HOST_URL    = 'http://sonarqube:9000'
         SONAR_PROJECT_KEY = 'cicd-demo'
-        SONAR_TOKEN       = 'sqa_99650d7f3fc3d947b22e9274651c3cff3085cdee'
+        SONAR_TOKEN       = 'squ_ca83ec8f55baa29de4f7cf58d79d769520efedf3'
         SONAR_LOGIN       = 'admin'
         SONAR_PASSWORD    = 'admin123'
     }
